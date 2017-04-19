@@ -3,10 +3,10 @@ const mongoose = require('mongoose')
 require('./db.js')
 
 const commentSchema = new mongoose.Schema({
-	commentId: Number, author: String, date: Date, text: String
+	author: String, date: Date, text: String
 })
 const articleSchema = new mongoose.Schema({
-	id: Number, author: String, img: String, date: Date, text: String,
+	author: String, img: String, date: Date, text: String,
 	comments: [ commentSchema ]
 })
 
@@ -31,6 +31,7 @@ const followingSchema = new mongoose.Schema({
 })
 
 exports.Article = mongoose.model('article', articleSchema)
+exports.Comment = mongoose.model('comment', commentSchema)
 exports.Profile = mongoose.model('profile', profileSchema)
 exports.User = mongoose.model('user', userSchema)
 exports.Following = mongoose.model('following', followingSchema)

@@ -1,92 +1,231 @@
 const isLoggedIn = require('./auth').isLoggedIn
 const Article = require('./model.js').Article
+const Comment = require('./model.js').Comment
+const Profile = require('./model.js').Profile
+const ObjectId = require('mongoose').Types.ObjectId
 
-var articleID = 2
-const articleBank = {
-        articles: [
-            { id: 0, author: "Ben", text: 'lol here is some text', comments: [] },
-            { id: 1, author: "Ben", text: 'another article', comments: [] },
-            { id: 2, author: "Ben", text: 'what am i doing', comments: [] } 
-        ]
-    }
+// Function that resets articles to a set of default data.
+const resetDefaultArticles = () => {
+    // Clear documents.
+    Article.remove({}, (err) => {})
+    Comment.remove({}, (err) => {})
+
+    new Article({ 
+        author: "Ben",
+        img: "https://upload.wikimedia.org/wikipedia/commons/c/c3/Danburite-34745.jpg",
+        date: new Date(2017, 11, 23),
+        text: 'lol here is some text',
+        comments: []
+    }).save()
+    new Article({
+        author: "Ben",
+        img: "https://upload.wikimedia.org/wikipedia/commons/6/62/8-Foot_Transonic_Pressure_Tunnel_%289443013735%29.jpg",
+        date: new Date(2016, 12, 11),
+        text: 'another article',
+        comments: []
+    }).save()
+    new Article({
+        author: "Ben",
+        img: "https://upload.wikimedia.org/wikipedia/commons/0/06/Quartiere_Chepabbash_%28Rodi_Garganico%295.jpg",
+        date: new Date(2017, 8, 8),
+        text: 'what am i doing',
+        comments: []
+    }).save()
+    new Article({
+        author: "Dummy",
+        img: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Coding_da_Vinci_Kick_Off_%2825_%26_26-04-2015%29_089.jpg",
+        date: new Date(2017, 2, 11),
+        text: 'Dumb Article',
+        comments: []
+    }).save()
+    new Article({
+        author: "Timmy",
+        img: "https://upload.wikimedia.org/wikipedia/commons/6/6b/John_Gruden.jpg",
+        date: new Date(2015, 3, 23),
+        text: 'Hey this is Timmy',
+        comments: []
+    }).save()
+}
+
+resetDefaultArticles()
+
+// Function that finds an article based on id.
+const findById = (id, callback) => {
+    console.log('Find article by id: ', id)
+    Article.findById(id, (err, doc) => {  
+        if (err){
+            throw new Error(err)
+        }
+        callback(doc)
+    })
+}
+
+// Function that queries articles based on either author or id.
+const findByIdsOrUsernames = (queries, callback) => {
+    console.log('Find article by author/Id: ', queries)
+    const articles = []
+    // Try to find by author.
+    Article.find({ author: {$in: queries} }).exec((err, itemsByAuthor) => {
+        if (err){
+            throw new Error(err)
+        }
+        articles.push(...itemsByAuthor)
+        // Try to find by _id.
+        Article.find({ _id: {$in: queries.filter((query) => { return ObjectId.isValid(query)})} }).exec((err, itemsById) => {
+            if (err){
+                throw new Error(err)
+            }
+            articles.push(...itemsById)
+            callback(articles)
+        })
+	})
+}
+
+// Function that updates an article based on id.
+const updateById = (id, newText, callback) => {
+    console.log('Update article by id: ', id)
+    Article.findByIdAndUpdate(id, { text: newText }, { new: true }, (err, doc) => {  
+        if (err){
+            throw new Error(err)
+        }
+        callback(doc)
+    })
+}
+
+// Function that updates an article's comment based on id.
+const updateCommentById = (id, commentId, newText, res, callback) => {
+    console.log('Update comment by id: ', id, commentId)
+    Article.findById(id, (err, document) => {
+        if (err){
+            throw new Error(err)
+        }
+        Comment.findById(commentId, (err, comment) => {
+            if (err){
+                throw new Error(err)
+            }
+            if (comment){
+                if (document.comments.some( (comment) => { return comment._id == commentId })){
+                    Comment.findByIdAndUpdate(commentId, { text: newText }, { new: true }, (err, newComment) => {
+                        if (err){
+                            throw new Error(err)
+                        }
+                        const newComments = document.comments.map( (comment) => { return (comment._id == newComment._id ? newComment : comment) })
+                        Article.findByIdAndUpdate(id, { comments: newComment }, { new: true }, (err, newDocument) => {
+                            callback(newDocument)
+                        })
+                    })
+                } else {
+                    res.status(404).send("Comment not found in Article!")
+                }
+            } else {
+                res.status(404).send("Comment not found!")
+            }
+        })
+    })
+}
+
+// Function that adds a comment to an article based on id.
+const addCommentById = (id, author, newText, res, callback) => {
+    console.log('Add comment by id: ', id)
+    findById(id, (article) => {
+        if (article){
+            new Comment({
+                author: author,
+                date: new Date(),
+                text: newText
+            }).save( (err, newComment) => {
+                if (err){
+                    throw new Error(err)
+                }
+                article.comments.push(newComment)
+                Article.findByIdAndUpdate(id, { comments: article.comments }, { new: true }, (err, newArticle) => {
+                    callback(newArticle)
+                })
+            })
+        } else{
+            res.status(404).send("Article not found!")
+        }
+    })
+}
 
 const getArticles = (req, res) => {
     console.log('Payload received:', req.body)
     console.log('Parameters received:', req.params)
     if (!req.params.id){
-        // No id specified. Send all articles.
-        res.send(articleBank)
+        // No id specified. Send all articles in database.
+        Article.find({}, (err, articles) => {
+            res.send({ articles: articles })
+        })
     } else {
         const ids = req.params.id.split(',')
-        const articles = []
-        // Populate article list with articles that match on ids.
-        ids.forEach(function(element) {
-            const addArticle = articleBank.articles.find(({ id }) => {
-                return id == element
-            })
-            if(addArticle){
-                articles.push(addArticle)
-            }
-        }, this);
-
-        res.send({ articles: articles })
+        // Populate article list with articles that match on ids or author.
+        findByIdsOrUsernames(ids, (articles) => {
+            res.send({ articles: articles })
+        })
     }
 }
 
 const updateArticles = (req, res) => {
     console.log('Payload received:', req.body)
     console.log('Parameters received:', req.params)
-    if (!req.user) {
-        req.user = 'Dummy'
-    }
-    const article = articleBank.articles.find(({ id }) => {
-        return id == req.params.id
-    })
-    if (!article) {
-        res.sendStatus(404)
-        return
-    }
 
     if (req.body.hasOwnProperty("commentId")){
         // Update or post comment.
-        if (req.body.commentId >= 0) {
-            if (article.comments && article.comments.length > 0) {
-                const comment = article.comments.find(({ commentId }) => {
-                    return commentId == req.body.commentId
-                })
-                console.log(comment)
-                if (comment){
-                    comment.text = req.body.text
+        if (req.body.commentId != -1) {
+            Comment.findById(req.body.commentId, (err, comment) => {
+                if (comment && comment.author == req.user){
+                    updateCommentById(req.params.id, req.body.commentId, req.body.text, res, (newArticle) => {
+                        if (newArticle){
+                            res.send({ articles: [newArticle] })
+                        } else {
+                            res.status(404).send("Article or Comment not found!")
+                        }
+                    })
                 } else{
-                    res.sendStatus(404)
-                    return
+                    res.status(401).send("Unauthorized!")
                 }
-            } else{
-                res.sendStatus(404)
-                return
-            }
-        } else{
-            article.comments.push({ commentId: article.comments.length, author: req.user, text: req.body.text })
+            })
+        } else {
+            addCommentById(req.params.id, req.user, req.body.text, res, (newArticle) => {
+                if (newArticle){
+                    res.send({ articles: [newArticle] })
+                } else {
+                    res.status(404).send("Article not found!")
+                }
+            })
         }
     } else {
         // Update article.
-        article.text = req.body.text
+        findById(req.params.id, (document) => {
+            if (document.author == req.user){
+                updateById(req.params.id, req.body.text, (newArticle) => {
+                    if (newArticle){
+                        res.send({ articles: [newArticle] })
+                    } else{
+                        res.status(404).send("Article not found!")
+                    }
+                })
+            } else{
+                res.status(401).send("Unauthorized!")
+            }
+        })
     }
-    res.send({ article })
 }
 
 const postArticle = (req, res) => {
     console.log('Payload received:', req.body)
     console.log('Parameters received:', req.params)
-    if (!req.user) {
-        req.user = 'Dummy'
-    }
-    // TODO: Image upload?
-    const newArticle = { id: ++articleID, author: req.user, text: req.body.text, comments: [], cid: 0}
-    articleBank.articles.push(newArticle)
-    res.send(newArticle)
+    new Article({
+        author: req.user,
+        date: new Date(),
+        text: req.body.text,
+        comments: []
+    }).save( (err, newArticle) => {
+        findById(newArticle._id, (articles) => {
+            res.send({ articles: articles})
+        })
+    })
 }
-
 
 module.exports = (app) => {
     app.get('/articles/:id*?', isLoggedIn, getArticles)

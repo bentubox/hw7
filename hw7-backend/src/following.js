@@ -45,7 +45,7 @@ const findOneByUsername = (username, callback) => {
     console.log('Find one by username: ', username)
     Following.findOne({ username: username }).exec((err, document) => {
 		if (err){
-            throw new Error("Error finding by username!")
+            throw new Error(err)
         }
         callback(document)
 	})
@@ -56,7 +56,7 @@ const updateByUsername = (username, newField, callback) => {
     console.log('Update by username: ', username)
     Following.findOneAndUpdate({ username: username }, newField, { new: true }, (err, doc) => {  
         if (err){
-            throw new Error("Error updating Profile!")
+            throw new Error(err)
         }
         callback(doc)
     })
@@ -84,17 +84,19 @@ const addFollowing = (req, res) => {
 
     Profile.findOne({ username: req.params.user }).exec((err, document) => {
 		if (err){
-            throw new Error("Error finding by username!")
+            throw new Error(err)
         }
 
         findOneByUsername(req.user, (result) => {
             if (document){
+                // Username is in database.
                 result.following.push(req.params.user)
                 updateByUsername(req.user, { following: result.following }, (newDocument) => {
                     res.send({ username: newDocument.username, following: newDocument.following })
                 })
             } else {
-                res.send({ username: result.username, following: result.following })
+                // Username not in database.
+                res.status(404).send({ username: result.username, following: result.following })
             } 
         })
 	})

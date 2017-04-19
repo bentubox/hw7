@@ -6,12 +6,12 @@ const app = express()
 
 // Enable CORS.
 const enableCORS = (req, res, next) => {
-    res.set('Access-Control-Allow-Origin', req.headers.host)
+    res.set('Access-Control-Allow-Origin', req.headers.origin)
     res.set('Access-Control-Allow-Credentials', true)
     res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
     res.set('Access-Control-Allow-Headers', 'Authorization, Accept, Content-Type, Origin, X-Requested-With')
     if(req.method === 'OPTIONS'){
-        res.status(200)
+        res.sendStatus(200)
     }
     next()
 }
