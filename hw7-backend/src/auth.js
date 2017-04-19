@@ -1,6 +1,7 @@
 const md5 = require('md5')
 const User = require('./model.js').User
 const Profile = require('./model.js').Profile
+const Following = require('./model.js').Following
 
 // Cookie id for authentication.
 const cooKey = 'sid'
@@ -41,7 +42,7 @@ const resetDefaultUsers = () => {
         }).save()
 }
 
-// resetDefaultUsers()
+resetDefaultUsers()
 
 const debug = (req, res) => {
     res.send(sessionUser)
@@ -73,6 +74,10 @@ const loginUser = (req, res) => {
             return
         }
     })
+}
+
+const autoLoginUser = (req, res) => {
+    res.send({result: "success", username: req.user})
 }
 
 const isLoggedIn = (req, res, next) => {
@@ -126,7 +131,7 @@ const updatePassword = (req, res) => {
     // Password changing is not supported. Return with denial message.
     const salt = Math.random() * 1000
     const hash = md5(`lol${req.body.password}${salt}`)
-    User.findOneAndUpdate({ username: req.user }, { hash: hash }, { new: true }, (err, newUser) => {
+    User.findOneAndUpdate({ username: req.user }, { hash: hash, salt: salt }, { new: true }, (err, newUser) => {
         if (err) {
             throw new Error(err)
         }
@@ -143,6 +148,7 @@ module.exports = (app) => {
     app.put('/logout', isLoggedIn, logoutUser)
     app.post('/register', registerUser)
     app.put('/password', isLoggedIn, updatePassword)
+    app.get('/autologin', isLoggedIn, autoLoginUser)
 }
 
 module.exports.isLoggedIn = isLoggedIn

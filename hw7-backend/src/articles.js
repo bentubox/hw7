@@ -13,7 +13,7 @@ const resetDefaultArticles = () => {
     new Article({ 
         author: "Ben",
         img: "https://upload.wikimedia.org/wikipedia/commons/c/c3/Danburite-34745.jpg",
-        date: new Date(2017, 11, 23),
+        date: new Date(2016, 11, 23),
         text: 'lol here is some text',
         comments: []
     }).save()
@@ -27,7 +27,7 @@ const resetDefaultArticles = () => {
     new Article({
         author: "Ben",
         img: "https://upload.wikimedia.org/wikipedia/commons/0/06/Quartiere_Chepabbash_%28Rodi_Garganico%295.jpg",
-        date: new Date(2017, 8, 8),
+        date: new Date(2016, 8, 8),
         text: 'what am i doing',
         comments: []
     }).save()
@@ -55,7 +55,7 @@ const resetDefaultArticles = () => {
     new Article({ 
         author: "Dummy",
         img: "https://upload.wikimedia.org/wikipedia/commons/0/0a/Ovcharov_Karp.JPG",
-        date: new Date(2017, 4, 15),
+        date: new Date(2017, 3, 15),
         text: 'five days no food or water',
         comments: []
     }).save( (err, document) => {
@@ -107,7 +107,7 @@ const resetDefaultArticles = () => {
     }).save()
 }
 
-// resetDefaultArticles()
+resetDefaultArticles()
 
 // Function that finds an article based on id.
 const findById = (id, callback) => {
