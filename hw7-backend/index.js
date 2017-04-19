@@ -11,7 +11,7 @@ const enableCORS = (req, res, next) => {
     res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
     res.set('Access-Control-Allow-Headers', 'Authorization, Accept, Content-Type, Origin, X-Requested-With')
     if(req.method === 'OPTIONS'){
-        res.sendStatus(200)
+        res.status(200)
     }
     next()
 }

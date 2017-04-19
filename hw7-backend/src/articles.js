@@ -45,9 +45,69 @@ const resetDefaultArticles = () => {
         text: 'Hey this is Timmy',
         comments: []
     }).save()
+    new Article({ 
+        author: "bnt1test",
+        img: "https://upload.wikimedia.org/wikipedia/commons/2/29/Two_outlines_of_faces_expressing_admiration_%28left%29_and_aston_Wellcome_V0009376.jpg",
+        date: new Date(2016, 8, 12),
+        text: 'TEST ARTICLE',
+        comments: []
+    }).save()    
+    new Article({ 
+        author: "Dummy",
+        img: "https://upload.wikimedia.org/wikipedia/commons/0/0a/Ovcharov_Karp.JPG",
+        date: new Date(2017, 4, 15),
+        text: 'five days no food or water',
+        comments: []
+    }).save( (err, document) => {
+        new Comment({
+            author: "bnt1test",
+            date: new Date(2017, 4, 17),
+            text: "hold on i'll send you some. what address?"
+            }).save( (err, comment0) => {
+                document.comments.push(comment0)
+                new Comment({
+                    author: "Timmy",
+                    date: new Date(2017, 4, 18),
+                    text: "lol sux"
+                }).save( (err, comment1) => {
+                    document.comments.push(comment1)
+                    Article.findByIdAndUpdate(document._id, { comments: document.comments }, { new: true}, (err, newDocument) => {})
+                })
+            })
+    })
+    new Article({ 
+        author: "bnt1test",
+        img: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Jan_Baptist_van_der_Hulst_-_Koning_Willem_II_en_familie.jpg",
+        date: new Date(2016, 3, 1),
+        text: 'Hey',
+        comments: []
+    }).save()
+    new Article({ 
+        author: "Jimmy",
+        img: "https://upload.wikimedia.org/wikipedia/commons/4/47/Rudge_Multi_1914.jpg",
+        date: new Date(2017, 2, 5),
+        text: 'Trapped in garage',
+        comments: []
+    }).save( (err, document) => {
+        new Comment({
+                author: "Timmy",
+                date: new Date(2017, 2, 20),
+                text: "good"
+            }).save( (err, comment) => {
+                document.comments.push(comment)
+                Article.findByIdAndUpdate(document._id, { comments: document.comments }, {new: true}, (err, newDocument) => {})
+            })
+    })
+    new Article({ 
+        author: "Kimmy",
+        img: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Vowel_chart_of_the_Canadian_Old_Colony_vowels.svg",
+        date: new Date(2017, 3, 19),
+        text: 'Someone put glue on my pillow and now im stuck pls help',
+        comments: []
+    }).save()
 }
 
-resetDefaultArticles()
+// resetDefaultArticles()
 
 // Function that finds an article based on id.
 const findById = (id, callback) => {

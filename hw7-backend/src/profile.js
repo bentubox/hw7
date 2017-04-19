@@ -38,9 +38,17 @@ const resetDefaultProfiles = () => {
             zipcode: 88888,
             avatar: 'https://upload.wikimedia.org/wikipedia/commons/b/be/One_of_the_many_decrepit_churches_out_here.jpg'
         }).save()
+    new Profile({ 
+            username: 'bnt1test',
+            headline: 'I am a test user.',
+            email: 'bnt1@rice.edu',
+            dob: new Date(1992, 10, 21),
+            zipcode: 12731,
+            avatar: 'https://upload.wikimedia.org/wikipedia/commons/5/5d/A_bridge_over_the_former_Waverley_Railway_Line_-_geograph.org.uk_-_1062461.jpg'
+        }).save()
 }
 
-resetDefaultProfiles()
+// resetDefaultProfiles()
 
 // Functions that query users by username, then runs a callback function on the results.
 const findByUsernames = (usernames, callback) => {
@@ -144,17 +152,17 @@ const getZipcode = (req, res) => {
     // Requested user.
     const requestedUser = req.params.user ? req.params.user : req.user
     findOneByUsername(requestedUser, (result) => {
-        res.send({ username: result.username, zipcode: result.zipcode })
+         if (result){
+            res.send({ username: result.username, zipcode: result.zipcode })
+        } else {
+            res.status(404).send("Could not find user!")
+        }
     })
 }
 const updateZipcode = (req, res) => {
     console.log('Payload received:', req.body)
     updateByUsername(req.user, { zipcode: req.body.zipcode }, (document) => {
-        if (result){
-            res.send({ username: document.username, zipcode: document.zipcode })
-        } else {
-            res.status(404).send("Could not find user!")
-        }
+        res.send({ username: document.username, zipcode: document.zipcode })
     })
 }
 

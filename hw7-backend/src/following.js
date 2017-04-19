@@ -35,10 +35,18 @@ const resetDefaultFollowing = () => {
                 'Jimmy',
                 'Timmy'
             ]
-        }).save()    
+        }).save()
+    new Following({ 
+        username:"bnt1test",
+        following: [
+                'Dummy',
+                "Timmy",
+                'Kimmy'
+            ]
+        }).save() 
 }
 
-resetDefaultFollowing()
+// resetDefaultFollowing()
 
 // Function that queries users by username, then runs a callback function on the results.
 const findOneByUsername = (username, callback) => {

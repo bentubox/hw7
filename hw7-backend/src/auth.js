@@ -35,13 +35,13 @@ const resetDefaultUsers = () => {
             hash: md5(`lol1234111`)
         }).save()
     new User({ 
-            username:"bnt1-test",
+            username:"bnt1test",
             salt: 888,
             hash: md5(`lolat-repeat-ask888`)
         }).save()
 }
 
-resetDefaultUsers()
+// resetDefaultUsers()
 
 const debug = (req, res) => {
     res.send(sessionUser)
@@ -112,7 +112,12 @@ const registerUser = (req, res) => {
             dob: req.body.dob,
             zipcode: req.body.zipcode
         }).save( () => {
-            res.send({result: "success", username: req.body.username})
+            new Following({
+                username: req.body.username,
+                following: []
+            }).save( () => {
+                 res.send({result: "success", username: req.body.username})
+            })
         })
     })   
 }
