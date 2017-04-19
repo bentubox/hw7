@@ -107,7 +107,7 @@ const resetDefaultArticles = () => {
     }).save()
 }
 
-resetDefaultArticles()
+// resetDefaultArticles()
 
 // Function that finds an article based on id.
 const findById = (id, callback) => {

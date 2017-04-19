@@ -42,7 +42,7 @@ const resetDefaultUsers = () => {
         }).save()
 }
 
-resetDefaultUsers()
+// resetDefaultUsers()
 
 const debug = (req, res) => {
     res.send(sessionUser)
